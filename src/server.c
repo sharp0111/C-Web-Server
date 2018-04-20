@@ -164,6 +164,7 @@ int get_listener_socket(char *port)
     fprintf(stderr, "webserver: failed to find local address\n");
     return -3;
   }
+<<<<<<< HEAD
 
   // Start listening. This is what allows remote computers to connect
   // to this socket/IP.
@@ -173,6 +174,17 @@ int get_listener_socket(char *port)
     return -4;
   }
 
+=======
+
+  // Start listening. This is what allows remote computers to connect
+  // to this socket/IP.
+  if (listen(sockfd, BACKLOG) == -1) {
+    //perror("listen");
+    close(sockfd);
+    return -4;
+  }
+
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
   return sockfd;
 }
 
@@ -189,12 +201,37 @@ int send_response(int fd, char *header, char *content_type, char *body)
 {
   const int max_response_size = 65536;
   char response[max_response_size];
+<<<<<<< HEAD
   int response_length;
 
   // !!!!  IMPLEMENT ME
   sprintf(response, "%s\n Content-Type: %s\n\n %s\n", header, content_type, body);
 
   response_length = strlen(response);
+=======
+
+  // Get current time for the HTTP header
+  time_t t1 = time(NULL);
+  struct tm *ltime = localtime(&t1);
+
+  // How many bytes in the body
+  int content_length = strlen(body);
+
+  int response_length = sprintf(response,
+    "%s\n"
+    "Content-Length: %d\n"
+    "Content-Type: %s\n"
+    "Date: %s" // asctime adds its own newline
+    "Connection: close\n"
+    "\n" // End of HTTP header
+    "%s",
+
+    header,
+    content_length,
+    content_type,
+    asctime(ltime),
+    body);
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 
   // Send it all!
   int rv = send(fd, response, response_length, 0);
@@ -224,11 +261,17 @@ void resp_404(int fd, char *path)
  */
 void get_root(int fd)
 {
+<<<<<<< HEAD
   // !!!! IMPLEMENT ME
   char response_body[1024];
   // char *txt = "Hello World!";
   sprintf(response_body, "<h1>Hello World!</h1>\n");
   send_response(fd, "HTTP/1.1 200 SUCCESS", "text/html", response_body);
+=======
+  char *response_body = "<html><head></head><body><h1>Hello, World!</h1></body></html>";
+
+  send_response(fd, "HTTP/1.1 200 OK", "text/html", response_body);
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -236,6 +279,7 @@ void get_root(int fd)
  */
 void get_d20(int fd)
 {
+<<<<<<< HEAD
   // !!!! IMPLEMENT ME
   // Hint: srand() with time(NULL), rand()
   time_t t;
@@ -243,6 +287,14 @@ void get_d20(int fd)
   char response_body[1024];
   sprintf(response_body, "Random Number 1 - 20: %i\n", rand() % 20);
   send_response(fd, "HTTP/1.1 200 SUCCESS", "text/plain", response_body);
+=======
+  srand(time(NULL) + getpid());
+
+  char response_body[8];
+  sprintf(response_body, "%d", (rand()%20)+1);
+
+  send_response(fd, "HTTP/1.1 200 OK", "text/plain", response_body);
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -250,6 +302,7 @@ void get_d20(int fd)
  */
 void get_date(int fd)
 {
+<<<<<<< HEAD
   // !!!! IMPLEMENT ME
   // Hint: time(NULL), gmtime()
 
@@ -259,6 +312,15 @@ void get_date(int fd)
   char response_body[1024];
   sprintf(response_body, "Current date and time: %s\n", ctime(&current_time));
   send_response(fd, "HTTP/1.1 200 SUCCESS", "text/plain", response_body);
+=======
+  char response_body[128];
+  time_t t1 = time(NULL);
+  struct tm *gtime = gmtime(&t1);
+
+  sprintf(response_body, "%s", asctime(gtime));
+
+  send_response(fd, "HTTP/1.1 200 OK", "text/plain", response_body);
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -266,9 +328,44 @@ void get_date(int fd)
  */
 void post_save(int fd, char *body)
 {
+<<<<<<< HEAD
   // !!!! IMPLEMENT ME
 
   // Save the body and send a response
+=======
+  char *status;
+
+  // Open the file
+  int file_fd = open("data.txt", O_CREAT|O_WRONLY, 0644);
+
+  if (file_fd >= 0) {
+    // Exclusive lock to keep processes from trying to write the file at the
+    // same time. This is only necessary if we've implemented a
+    // multiprocessed version with fork().
+    flock(file_fd, LOCK_EX);
+
+    // Write body
+    write(file_fd, body, strlen(body));
+
+    // Unlock
+    flock(file_fd, LOCK_UN);
+
+    // Close
+    close(file_fd);
+
+    status = "ok";
+  } else {
+    status = "fail";
+  }
+
+  // Now send an HTTP response
+
+  char response_body[128];
+
+  sprintf(response_body, "{\"status\": \"%s\"}", status);
+
+  send_response(fd, "HTTP/1.1 200 OK", "application/json", response_body);
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -279,7 +376,23 @@ void post_save(int fd, char *body)
  */
 char *find_end_of_header(char *header)
 {
+<<<<<<< HEAD
   // !!!! IMPLEMENT ME
+=======
+  char *p;
+
+  p = strstr(header, "\n\n");
+
+  if (p != NULL) return p;
+
+  p = strstr(header, "\r\n\r\n");
+
+  if (p != NULL) return p;
+
+  p = strstr(header, "\r\r");
+
+  return p;
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -305,6 +418,7 @@ void handle_http_request(int fd)
    // NUL terminate request string
   request[bytes_recvd] = '\0';
 
+<<<<<<< HEAD
   // !!!! IMPLEMENT ME
   // Get the request type and path from the first line
   // Hint: sscanf()!
@@ -344,6 +458,73 @@ void handle_http_request(int fd)
     return;
   } else {
     resp_404(fd, request_path);
+=======
+  // Parse the first line of the request
+  char *first_line = request;
+
+  // Look for newline
+  p = strchr(first_line, '\n');
+  *p = '\0';
+
+  // Remaining header
+  char *header = p + 1; // +1 to skip the '\n'
+
+  // Look for two newlines marking the end of the header
+  p = find_end_of_header(header);
+
+  if (p == NULL) {
+    printf("Could not find end of header\n");
+    exit(1);
+  }
+
+  // And here is the body
+  char *body = p;
+
+  /*
+  * Now that we've assessed the request, we can take actions.
+  */
+
+  // Read the three components of the first request line
+  sscanf(first_line, "%s %s %s", request_type, request_path,
+    request_protocol);
+
+  printf("REQUEST: %s %s %s\n", request_type, request_path, request_protocol);
+
+  if (strcmp(request_type, "GET") == 0) {
+
+    // Endpoint "/"
+    if (strcmp(request_path, "/") == 0) {
+      get_root(fd);
+    }
+
+    // Endpoint "/d20"
+    else if (strcmp(request_path, "/d20") == 0) {
+      get_d20(fd);
+    }
+
+    // Endpoint "/date"
+    else if (strcmp(request_path, "/date") == 0) {
+      get_date(fd);
+    }
+
+    else {
+      resp_404(fd, request_path);
+    }
+  }
+
+  else if (strcmp(request_type, "POST") == 0) {
+    // Endpoint "/save"
+    if (strcmp(request_path, "/save") == 0) {
+      post_save(fd, body);
+
+    } else {
+      resp_404(fd, request_path);
+    }
+  }
+
+  else {
+    fprintf(stderr, "unknown request type \"%s\"\n", request_type);
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
     return;
   }
 }
@@ -384,6 +565,7 @@ int main(void)
       perror("accept");
       continue;
     }
+<<<<<<< HEAD
 
     // Print out a message that we got the connection
     inet_ntop(their_addr.ss_family,
@@ -403,6 +585,46 @@ int main(void)
     close(newfd);
   }
 
+=======
+
+    // Print out a message that we got the connection
+    inet_ntop(their_addr.ss_family,
+      get_in_addr((struct sockaddr *)&their_addr),
+      s, sizeof s);
+    printf("server: got connection from %s\n", s);
+    
+    // newfd is a new socket descriptor for the new connection.
+    // listenfd is still listening for new connections.
+
+    // For the non-fork() solution, remove this block of code and replace it with the one liner:
+    //
+    //     handle_http_request(newfd);
+    //
+    if (fork() == 0) {
+      // We're the child process
+
+      // We don't need the listening socket. The parent
+      // process's listenfd is still open--we just close it in the
+      // child.
+      close(listenfd);
+
+      // This does the heavy lifting, recv() the HTTP request and
+      // send() the HTTP response.
+      handle_http_request(newfd);
+
+      // And this child is done! Bye bye!
+      exit(0);
+    }
+
+    // Parent process out here, still
+
+    // Parent doesn't need this. We need to close them as we get
+    // them so we don't fill up the parent's file descriptor table.
+    // The child's copy of newfd remains open.
+    close(newfd);
+  }
+
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
   // Unreachable code
 
   return 0;

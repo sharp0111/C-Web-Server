@@ -1,5 +1,6 @@
-# A Simple Web Server in C
+# A Simple Web Server in C (solution branch)
 
+<<<<<<< HEAD
 In this project, we'll finish the implementation of a web server in C.
 
 What's already there:
@@ -321,3 +322,6 @@ Convert the web server to be multiprocessed by using the `fork()` system call.
 
    What happens if multiple processes try to write to the POSTed file at the
    same time without locking the file?
+=======
+For the README, check out the `master` branch.
+>>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
