@@ -164,7 +164,6 @@ int get_listener_socket(char *port)
     fprintf(stderr, "webserver: failed to find local address\n");
     return -3;
   }
-<<<<<<< HEAD
 
   // Start listening. This is what allows remote computers to connect
   // to this socket/IP.
@@ -174,17 +173,6 @@ int get_listener_socket(char *port)
     return -4;
   }
 
-=======
-
-  // Start listening. This is what allows remote computers to connect
-  // to this socket/IP.
-  if (listen(sockfd, BACKLOG) == -1) {
-    //perror("listen");
-    close(sockfd);
-    return -4;
-  }
-
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
   return sockfd;
 }
 
@@ -201,14 +189,6 @@ int send_response(int fd, char *header, char *content_type, char *body)
 {
   const int max_response_size = 65536;
   char response[max_response_size];
-<<<<<<< HEAD
-  int response_length;
-
-  // !!!!  IMPLEMENT ME
-  sprintf(response, "%s\n Content-Type: %s\n\n %s\n", header, content_type, body);
-
-  response_length = strlen(response);
-=======
 
   // Get current time for the HTTP header
   time_t t1 = time(NULL);
@@ -231,7 +211,6 @@ int send_response(int fd, char *header, char *content_type, char *body)
     content_type,
     asctime(ltime),
     body);
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 
   // Send it all!
   int rv = send(fd, response, response_length, 0);
@@ -261,17 +240,9 @@ void resp_404(int fd, char *path)
  */
 void get_root(int fd)
 {
-<<<<<<< HEAD
-  // !!!! IMPLEMENT ME
-  char response_body[1024];
-  // char *txt = "Hello World!";
-  sprintf(response_body, "<h1>Hello World!</h1>\n");
-  send_response(fd, "HTTP/1.1 200 SUCCESS", "text/html", response_body);
-=======
   char *response_body = "<html><head></head><body><h1>Hello, World!</h1></body></html>";
 
   send_response(fd, "HTTP/1.1 200 OK", "text/html", response_body);
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -279,22 +250,12 @@ void get_root(int fd)
  */
 void get_d20(int fd)
 {
-<<<<<<< HEAD
-  // !!!! IMPLEMENT ME
-  // Hint: srand() with time(NULL), rand()
-  time_t t;
-  srand((unsigned) time(&t));
-  char response_body[1024];
-  sprintf(response_body, "Random Number 1 - 20: %i\n", rand() % 20);
-  send_response(fd, "HTTP/1.1 200 SUCCESS", "text/plain", response_body);
-=======
   srand(time(NULL) + getpid());
 
   char response_body[8];
   sprintf(response_body, "%d", (rand()%20)+1);
 
   send_response(fd, "HTTP/1.1 200 OK", "text/plain", response_body);
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -302,17 +263,6 @@ void get_d20(int fd)
  */
 void get_date(int fd)
 {
-<<<<<<< HEAD
-  // !!!! IMPLEMENT ME
-  // Hint: time(NULL), gmtime()
-
-  time_t current_time = time(NULL);
-  struct tm* gmt = gmtime(&current_time);
-
-  char response_body[1024];
-  sprintf(response_body, "Current date and time: %s\n", ctime(&current_time));
-  send_response(fd, "HTTP/1.1 200 SUCCESS", "text/plain", response_body);
-=======
   char response_body[128];
   time_t t1 = time(NULL);
   struct tm *gtime = gmtime(&t1);
@@ -320,7 +270,6 @@ void get_date(int fd)
   sprintf(response_body, "%s", asctime(gtime));
 
   send_response(fd, "HTTP/1.1 200 OK", "text/plain", response_body);
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -328,11 +277,6 @@ void get_date(int fd)
  */
 void post_save(int fd, char *body)
 {
-<<<<<<< HEAD
-  // !!!! IMPLEMENT ME
-
-  // Save the body and send a response
-=======
   char *status;
 
   // Open the file
@@ -365,7 +309,6 @@ void post_save(int fd, char *body)
   sprintf(response_body, "{\"status\": \"%s\"}", status);
 
   send_response(fd, "HTTP/1.1 200 OK", "application/json", response_body);
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -376,9 +319,6 @@ void post_save(int fd, char *body)
  */
 char *find_end_of_header(char *header)
 {
-<<<<<<< HEAD
-  // !!!! IMPLEMENT ME
-=======
   char *p;
 
   p = strstr(header, "\n\n");
@@ -392,7 +332,6 @@ char *find_end_of_header(char *header)
   p = strstr(header, "\r\r");
 
   return p;
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
 }
 
 /**
@@ -418,47 +357,6 @@ void handle_http_request(int fd)
    // NUL terminate request string
   request[bytes_recvd] = '\0';
 
-<<<<<<< HEAD
-  // !!!! IMPLEMENT ME
-  // Get the request type and path from the first line
-  // Hint: sscanf()!
-  sscanf(request, "%s %s %s", request_type, request_path, request_protocol);
-  // printf("%s", request);
-
-  // !!!! IMPLEMENT ME (stretch goal)
-  // find_end_of_header()
-
-  // !!!! IMPLEMENT ME
-  // call the appropriate handler functions, above, with the incoming data
-
-  // unsigned int reqtype = strcmp("GET", request_type);
-  char *reqpathRootM = malloc(strlen("/"));
-  strcpy(reqpathRootM, "/");
-  // unsigned int reqpathRoot = strcmp(reqpathRootM, request_path);
-
-  // char reqpathRand = strcmp("/d20", request_path);
-  char *reqpathRandM = malloc(strlen("/d20"));
-  strcpy(reqpathRandM, "/d20");
-  // unsigned int reqpathRand = strcmp(reqpathRandM, request_path);
-
-  // char reqpathDate = strcmp("/date", request_path);
-  char *reqpathDateM = malloc(strlen("/date"));
-  strcpy(reqpathDateM, "/date");
-  // unsigned int reqpathDate = strcmp(reqpathDateM, request_path);
-  // printf("%s %s %s", reqpathRoot, reqpathRand, reqpathDate);
-
-  if (strcmp(request_path, reqpathRootM) == 0) {
-    get_root(fd);
-    return;
-  } else if (strcmp(request_path, reqpathRandM) == 0) {
-    get_d20(fd);
-    return;
-  } else if (strcmp(request_path, reqpathDateM) == 0) {
-    get_date(fd);
-    return;
-  } else {
-    resp_404(fd, request_path);
-=======
   // Parse the first line of the request
   char *first_line = request;
 
@@ -524,7 +422,6 @@ void handle_http_request(int fd)
 
   else {
     fprintf(stderr, "unknown request type \"%s\"\n", request_type);
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
     return;
   }
 }
@@ -565,27 +462,6 @@ int main(void)
       perror("accept");
       continue;
     }
-<<<<<<< HEAD
-
-    // Print out a message that we got the connection
-    inet_ntop(their_addr.ss_family,
-      get_in_addr((struct sockaddr *)&their_addr),
-      s, sizeof s);
-    printf("server: got connection from %s\n", s);
-    
-    // newfd is a new socket descriptor for the new connection.
-    // listenfd is still listening for new connections.
-
-    // !!!! IMPLEMENT ME (stretch goal)
-    // Convert this to be multiprocessed with fork()
-
-    handle_http_request(newfd);
-
-    // Done with this
-    close(newfd);
-  }
-
-=======
 
     // Print out a message that we got the connection
     inet_ntop(their_addr.ss_family,
@@ -624,7 +500,6 @@ int main(void)
     close(newfd);
   }
 
->>>>>>> bcb89566ba318eac930706d4e6d34b067eff1b4e
   // Unreachable code
 
   return 0;
